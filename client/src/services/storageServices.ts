@@ -1,25 +1,27 @@
 // src/services/storage.services.ts
 import localforage from 'localforage';
 
-// Initialize separate stores for organization
 const puzzleStore = localforage.createInstance({
   name: 'DailyPuzzleGame',
-  storeName: 'puzzles' // For caching puzzle data
+  storeName: 'puzzles', 
+  description: 'Cache for daily puzzles'
 });
 
 const userStore = localforage.createInstance({
   name: 'DailyPuzzleGame',
-  storeName: 'user_progress' // For streaks, solved puzzles
+  storeName: 'user_progress',
+  description: 'User streaks and stats'
 });
 
 export const StorageService = {
-  // Generic Generic Get
+  // Generic Get
   getItem: async <T>(key: string, store: 'puzzle' | 'user' = 'user'): Promise<T | null> => {
     try {
       const targetStore = store === 'puzzle' ? puzzleStore : userStore;
-      return await targetStore.getItem<T>(key);
+      const value = await targetStore.getItem<T>(key);
+      return value;
     } catch (error) {
-      console.error(`Storage Read Error (${key}):`, error);
+      console.error(`Storage READ Error [${key}]:`, error);
       return null;
     }
   },
@@ -30,12 +32,18 @@ export const StorageService = {
       const targetStore = store === 'puzzle' ? puzzleStore : userStore;
       return await targetStore.setItem(key, value);
     } catch (error) {
-      console.error(`Storage Write Error (${key}):`, error);
+      console.error(`Storage WRITE Error [${key}]:`, error);
       throw error;
     }
   },
 
-  // Clear specific store (useful for logout)
+  // Remove Item
+  removeItem: async (key: string, store: 'puzzle' | 'user' = 'user'): Promise<void> => {
+    const targetStore = store === 'puzzle' ? puzzleStore : userStore;
+    await targetStore.removeItem(key);
+  },
+
+  // Clear specific store (useful for Logout)
   clearUserData: async () => {
     await userStore.clear();
   }

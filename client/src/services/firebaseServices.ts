@@ -14,7 +14,8 @@ import {
 const getEnvVar = (key: string): string => {
   const value = import.meta.env[key];
   if (!value) {
-    throw new Error(`Missing environment variable: ${key}`);
+    console.error(`CRITICAL ERROR: Missing environment variable ${key}`);
+    throw new Error(`Missing env var: ${key}`);
   }
   return value;
 };
@@ -26,6 +27,7 @@ const firebaseConfig = {
   storageBucket: getEnvVar("VITE_FIREBASE_STORAGE_BUCKET"),
   messagingSenderId: getEnvVar("VITE_FIREBASE_MESSAGING_SENDER_ID"),
   appId: getEnvVar("VITE_FIREBASE_APP_ID"),
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
 };
 
 // Initialize Firebase only once
@@ -48,17 +50,13 @@ export const AuthService = {
       const result = await signInWithPopup(auth, googleProvider);
       return result.user;
     } catch (error: any) {
-      console.error("Auth Error:", error);
-      throw new Error(error.message || "Login failed");
+      console.error("Auth Error:", error.code, error.message);
+      throw error;
     }
   },
 
   logout: async (): Promise<void> => {
-    try {
-      await signOut(auth);
-    } catch (error: any) {
-      throw new Error(error.message || "Logout failed");
-    }
+    return signOut(auth);
   },
 
   subscribe: (callback: (user: User | null) => void) => {

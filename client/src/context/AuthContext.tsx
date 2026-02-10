@@ -14,14 +14,14 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const unsubscribe = AuthService.subscribe(async (currentUser) => {
-      setUser(currentUser);
+    const [user, setUser] = useState<User | null>(null);
+    const [loading, setLoading] = useState(true);
+    
+    useEffect(() => {
+        const unsubscribe = AuthService.subscribe(async (currentUser) => {
+            setUser(currentUser);
+            setLoading(false);
       
-      // OPTIMIZATION: Cache basic user info for offline usage
       if (currentUser) {
         await StorageService.setItem('user_profile', {
           uid: currentUser.uid,
@@ -30,7 +30,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         });
       }
       
-      setLoading(false);
     });
     return () => unsubscribe();
   }, []);

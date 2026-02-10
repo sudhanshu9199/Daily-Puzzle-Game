@@ -1,40 +1,56 @@
 // src/pages/Auth.tsx
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { useEffect } from 'react';
-import { LogIn } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { LogIn,Loader2 } from 'lucide-react';
 
 export default function Auth() {
   const { user, signIn } = useAuth();
   const navigate = useNavigate();
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
 
   // Redirect to Home if already logged in
   useEffect(() => {
     if (user) {
-      navigate('/');
+      navigate('/', { replace: true });
     }
   }, [user, navigate]);
 
   const handleLogin = async () => {
+    setIsLoggingIn(true);
     try {
       await signIn();
     } catch (error) {
-      alert("Failed to log in. Check console for details.");
+      console.error("Login failed", error);
+      alert("Login failed. Please try again.");
+    } finally {
+      setIsLoggingIn(false);
     }
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-slate-100 p-4">
-      <div className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md text-center">
-        <h2 className="text-3xl font-bold text-slate-800 mb-2">Welcome Back</h2>
-        <p className="text-slate-500 mb-8">Sign in to save your daily puzzle progress.</p>
-        
+    <div className="flex h-screen w-full items-center justify-center bg-slate-50 px-4">
+      <div className="w-full max-w-md space-y-8 rounded-2xl bg-white p-10 shadow-xl border border-slate-100">
+        <div className="text-center">
+          <h2 className="mt-2 text-3xl font-extrabold text-slate-900">
+            Daily Puzzle
+          </h2>
+          <p className="mt-2 text-sm text-slate-600">
+            Sign in to track your stats and keep your streak alive.
+          </p>
+        </div>
+
         <button
           onClick={handleLogin}
-          className="w-full flex items-center justify-center gap-3 bg-slate-900 text-white py-3 px-4 rounded-xl font-semibold hover:bg-slate-800 transition-all transform hover:scale-[1.02]"
+          disabled={isLoggingIn}
+          className="group relative flex w-full justify-center rounded-lg bg-blue-600 px-4 py-3 text-sm font-medium text-white transition-all hover:bg-blue-700 hover:shadow-lg disabled:opacity-70 disabled:cursor-not-allowed"
         >
-          <LogIn size={20} />
-          Sign in with Google
+          {isLoggingIn ? (
+            <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+          ) : (
+            <LogIn className="mr-2 h-5 w-5" />
+          )}
+          {isLoggingIn ? 'Signing in...' : 'Sign in with Google'}
         </button>
       </div>
     </div>

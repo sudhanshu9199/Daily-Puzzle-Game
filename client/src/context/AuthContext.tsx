@@ -1,7 +1,8 @@
 // src/context/AuthContext.tsx
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { User } from 'firebase/auth';
-import { subscribeToAuthChanges, loginWithGoogle, logoutUser } from '../services/firebaseServices';
+import { AuthService } from '../services/firebaseServices';
+import { StorageService } from '../services/storageServices';
 
 interface AuthContextType {
   user: User | null;
@@ -14,22 +15,33 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [loading,FLsetLoading] = useState(true);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = subscribeToAuthChanges((currentUser) => {
+    const unsubscribe = AuthService.subscribe(async (currentUser) => {
       setUser(currentUser);
+      
+      // OPTIMIZATION: Cache basic user info for offline usage
+      if (currentUser) {
+        await StorageService.setItem('user_profile', {
+          uid: currentUser.uid,
+          email: currentUser.email,
+          displayName: currentUser.displayName
+        });
+      }
+      
       setLoading(false);
     });
     return () => unsubscribe();
   }, []);
 
   const signIn = async () => {
-    await loginWithGoogle();
+    await AuthService.loginWithGoogle();
   };
 
   const signOut = async () => {
-    await logoutUser();
+    await AuthService.logout();
+    await StorageService.clearUserData(); // Privacy: Clear local data on logout
   };
 
   return (

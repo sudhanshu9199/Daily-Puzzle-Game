@@ -1,4 +1,4 @@
-// src/services/storage.services.ts
+// src/services/storageServices.ts
 import localforage from 'localforage';
 
 const puzzleStore = localforage.createInstance({

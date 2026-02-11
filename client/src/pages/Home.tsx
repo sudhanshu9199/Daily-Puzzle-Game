@@ -6,26 +6,25 @@ export default function Home() {
   const { user, signOut } = useAuth();
 
   return (
-    <div className="min-h-screen bg-slate-50 pb-10">
-      {/* Top Bar */}
-      <header className="px-4 py-4 flex justify-between items-center bg-white border-b border-slate-100">
-        <div className="flex items-center gap-2">
-           <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold">DP</div>
-           <span className="font-bold text-slate-700 hidden sm:block">Daily Puzzle</span>
+    <div className="min-h-screen bg-slate-50 pb-20">
+      {/* Simple Header */}
+      <nav className="bg-white border-b border-slate-100 px-4 py-3 flex justify-between items-center sticky top-0 z-10">
+        <div className="font-bold text-xl tracking-tight text-blue-600">
+            Puzzle<span className="text-slate-900">Day</span>
         </div>
         <div className="flex items-center gap-4">
-          <span className="text-sm text-slate-500 hidden sm:block">Welcome, {user?.displayName || 'Player'}</span>
-          <button 
-            onClick={() => signOut()}
-            className="text-sm text-red-500 hover:text-red-600 font-medium"
-          >
-            Sign Out
-          </button>
+            <span className="text-sm text-slate-500 hidden sm:inline">{user?.displayName}</span>
+            <button 
+                onClick={signOut}
+                className="text-sm font-medium text-slate-500 hover:text-red-500 transition-colors"
+            >
+                Sign Out
+            </button>
         </div>
-      </header>
+      </nav>
 
-      {/* Main Game Area */}
-      <main className="mt-6">
+      {/* Game Container */}
+      <main className="container mx-auto max-w-lg mt-6">
         <GameInterface />
       </main>
     </div>

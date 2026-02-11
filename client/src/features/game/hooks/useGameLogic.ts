@@ -2,27 +2,41 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { StorageService } from '../../../services/storageServices';
-import { Puzzle, GameState } from '../../../types/index.types';
+import { Puzzle, GameState, UserProgress } from '../../../types/index.types';
 import { generateDailyPuzzle } from '../utils/puzzleGenerator';
+import { validateSolution } from '../utils/validator';
 
 const getTodayDateString = () => new Date().toISOString().split('T')[0];
 
-const INITIAL_STATE: GameState = {
+const INITIAL_GAME_STATE: GameState = {
   currentDate: getTodayDateString(), // Helper needed
   puzzles: [],
   loading: true,
 };
 
+const INITIAL_PROGRESS: UserProgress = {
+  userId: 'local-user', // Replace with Auth ID in Phase 3
+  currentStreak: 0,
+  maxStreak: 0,
+  lastPlayedDate: null,
+  totalSolved: 0,
+  history: {},
+};
+
 export const useGameLogic = () => {
-  const [gameState, setGameState] = useState<GameState>(INITIAL_STATE);
+  const [gameState, setGameState] = useState<GameState>(INITIAL_GAME_STATE);
   const [currentPuzzle, setCurrentPuzzle] = useState<Puzzle | null>(null);
   const [userSolution, setUserSolution] = useState<string>("");
   const [feedback, setFeedback] = useState<'idle' | 'success' | 'error'>('idle');
+  const [progress, setProgress] = useState<UserProgress>(INITIAL_PROGRESS);
 
   // Load Game State on Mount
   useEffect(() => {
     const initGame = async () => {
       const today = getTodayDateString();
+
+      const savedProgress = await StorageService.getItem<UserProgress>('user_progress', 'user');
+      if (savedProgress) setProgress(savedProgress);
       
       // 1. Try to get today's puzzle from Cache (Offline First)
       let puzzle = await StorageService.getItem<Puzzle>(`puzzle_${today}`, 'puzzle');
@@ -34,8 +48,13 @@ export const useGameLogic = () => {
         // Cache it immediately
         await StorageService.setItem(`puzzle_${today}`, puzzle, 'puzzle');
       }
-
       setCurrentPuzzle(puzzle);
+
+      if (savedProgress?.history[today]?.solved) {
+        setFeedback('success');
+        setUserSolution(puzzle.solution); // Optional: Reveal answer
+      }
+
       setGameState(prev => ({ ...prev, loading: false }));
     };
 
@@ -43,17 +62,47 @@ export const useGameLogic = () => {
   }, []);
 
   const submitSolution = useCallback(async () => {
-    if (!currentPuzzle) return;
+    if (!currentPuzzle || feedback === 'success') return;
 
-    if (userSolution.trim().toLowerCase() === currentPuzzle.solution.toLowerCase()) {
+    const isCorrect = validateSolution(currentPuzzle, userSolution);
+    const today = getTodayDateString();
+
+    if (isCorrect) {
       setFeedback('success');
-      // Save progress
-      await StorageService.setItem(`solved_${currentPuzzle.id}`, true, 'user');
+
+      // Update Progress Logic (Phase 2 Requirement)
+      setProgress(prev => {
+        const isConsecutive = prev.lastPlayedDate === new Date(Date.now() - 86400000).toISOString().split('T')[0];
+        const newStreak = isConsecutive ? prev.currentStreak + 1 : 1;
+        
+        const newProgress: UserProgress = {
+          ...prev,
+          currentStreak: newStreak,
+          maxStreak: Math.max(prev.maxStreak, newStreak),
+          lastPlayedDate: today,
+          totalSolved: prev.totalSolved + 1,
+          history: {
+            ...prev.history,
+            [today]: {
+              solved: true,
+              attempts: (prev.history[today]?.attempts || 0) + 1,
+              timeTaken: 0, // Implement timer later
+            }
+          }
+        };
+        
+        // Async Save
+        StorageService.setItem('user_progress', newProgress, 'user');
+        return newProgress;
+      });
+
     } else {
       setFeedback('error');
+      // Track failed attempt
+      // (Optional: Update attempts in history without marking solved)
       setTimeout(() => setFeedback('idle'), 2000);
     }
-  }, [currentPuzzle, userSolution]);
+  }, [currentPuzzle, userSolution, feedback]);
 
   return {
     currentPuzzle,
@@ -61,6 +110,7 @@ export const useGameLogic = () => {
     setUserSolution,
     submitSolution,
     feedback,
+    progress,
     isLoading: gameState.loading
   };
 };

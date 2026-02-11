@@ -72,7 +72,9 @@ export const useGameLogic = () => {
 
       // Update Progress Logic (Phase 2 Requirement)
       setProgress(prev => {
-        const isConsecutive = prev.lastPlayedDate === new Date(Date.now() - 86400000).toISOString().split('T')[0];
+
+        const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+        const isConsecutive = prev.lastPlayedDate === yesterday;
         const newStreak = isConsecutive ? prev.currentStreak + 1 : 1;
         
         const newProgress: UserProgress = {
@@ -85,7 +87,7 @@ export const useGameLogic = () => {
             ...prev.history,
             [today]: {
               solved: true,
-              attempts: (prev.history[today]?.attempts || 0) + 1,
+              attempts: 1,
               timeTaken: 0, // Implement timer later
             }
           }

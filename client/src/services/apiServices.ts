@@ -25,7 +25,10 @@ export const ApiService = {
   syncProgress: (userId: string, data: any) => {
     return request<{ success: boolean; syncedAt: string }>('/sync', {
       method: 'POST',
-      body: JSON.stringify({Pk: userId, sk: 'PROGRESS', ...data }),
+      body: JSON.stringify({
+        user_id: userId, // SQL naming convention (snake_case)
+        ...data
+      }),
     });
   }
 };

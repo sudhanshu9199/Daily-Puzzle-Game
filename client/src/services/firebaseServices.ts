@@ -1,5 +1,5 @@
 // src/services/firebaseServices.ts
-import { initializeApp, FirebaseApp } from "firebase/app";
+import { initializeApp, FirebaseApp, getApp, getApps } from "firebase/app";
 import { 
   getAuth, 
   GoogleAuthProvider, 
@@ -31,16 +31,24 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase only once
-let app: FirebaseApp = initializeApp(firebaseConfig);
-let auth: Auth = getAuth(app);
+// let app: FirebaseApp = initializeApp(firebaseConfig);
+// let auth: Auth = getAuth(app);
 
-try {
+// try {
+//   app = initializeApp(firebaseConfig);
+//   auth = getAuth(app);
+// } catch (error) {
+//   console.error("Firebase initialization error:", error);
+// }
+
+let app: FirebaseApp;
+if (getApps().length === 0) {
   app = initializeApp(firebaseConfig);
-  auth = getAuth(app);
-} catch (error) {
-  console.error("Firebase initialization error:", error);
+} else {
+  app = getApp();
 }
 
+const auth: Auth = getAuth(app);
 const googleProvider = new GoogleAuthProvider();
 
 // Service Object

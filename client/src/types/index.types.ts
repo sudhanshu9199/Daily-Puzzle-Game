@@ -1,4 +1,4 @@
-// .types.ts
+// index.types.ts
 
 export interface UserProfile {
   uid: string;

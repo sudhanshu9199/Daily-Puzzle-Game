@@ -31,8 +31,8 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase only once
-let app: FirebaseApp;
-let auth: Auth;
+let app: FirebaseApp = initializeApp(firebaseConfig);
+let auth: Auth = getAuth(app);
 
 try {
   app = initializeApp(firebaseConfig);

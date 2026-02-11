@@ -3,15 +3,10 @@ import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom
 import { Suspense, lazy } from 'react';
 import { Loader2 } from 'lucide-react';
 import { useAuth } from './context/AuthContext';
+import { PageLoader } from './components/ui/Loader';
 
 const Home = lazy(() => import('./pages/Home'));
 const AuthPage = lazy(() => import('./pages/Auth'));
-
-const PageLoader = () => (
-  <div className="flex h-screen w-full items-center justify-center bg-slate-50">
-    <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
-  </div>
-);
 
 // 1. Only allow access if user is logged in
 const ProtectedRoute = () => {

@@ -22,7 +22,7 @@ export interface Puzzle {
 
 export interface UserProgress {
   userId: string;
-  currentStreakTc: number;
+  currentStreak: number;
   maxStreak: number;
   lastPlayedDate: string | null; // YYYY-MM-DD
   totalSolved: number;

@@ -126,6 +126,6 @@ export const useGameLogic = () => {
     progress,
     isLoading: gameState.loading,
     showHint,
-    revealHint: () => setShowHint(true)
+    revealHint
   };
 };

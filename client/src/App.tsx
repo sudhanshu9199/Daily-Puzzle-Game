@@ -1,8 +1,10 @@
 // src/App.tsx
-import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, Outlet, useLocation } from 'react-router-dom';
 import { Suspense, lazy } from 'react';
 import { useAuth } from './context/AuthContext';
 import { PageLoader } from './components/ui/Loader';
+import { AnimatePresence } from 'framer-motion';
+import { PageTransition } from './components/PageTransition';
 
 const Home = lazy(() => import('./pages/Home'));
 const AuthPage = lazy(() => import('./pages/Auth'));
@@ -21,25 +23,37 @@ const PublicRoute = () => {
   return user ? <Navigate to="/" replace /> : <Outlet />;
 };
 
+const AnimatedRoutes = () => {
+  const location = useLocation();
+  
+  return (
+    <AnimatePresence mode="wait">
+      <Routes location={location} key={location.pathname}>
+         {/* Route definitions... */}
+         <Route element={<PublicRoute />}>
+            <Route path="/auth" element={
+              <PageTransition><AuthPage /></PageTransition>
+            } />
+         </Route>
+
+         <Route element={<ProtectedRoute />}>
+            <Route path="/" element={
+              <PageTransition><Home /></PageTransition>
+            } />
+         </Route>
+
+         <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </AnimatePresence>
+  );
+};
+
 function App() {
   return (
     <BrowserRouter>
-      <div className="min-h-screen bg-slate-50 text-slate-900 font-sans">
+      <div className="min-h-screen bg-slate-50 text-slate-900 font-sans overflow-x-hidden">
         <Suspense fallback={<PageLoader />}>
-          <Routes>
-            {/* Public Routes */}
-            <Route element={<PublicRoute />}>
-              <Route path="/auth" element={<AuthPage />} />
-            </Route>
-
-            {/* Protected Game Routes */}
-            <Route element={<ProtectedRoute />}>
-              <Route path="/" element={<Home />} />
-            </Route>
-
-            {/* 404 Catch-all */}
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
+          <AnimatedRoutes />
         </Suspense>
       </div>
     </BrowserRouter>

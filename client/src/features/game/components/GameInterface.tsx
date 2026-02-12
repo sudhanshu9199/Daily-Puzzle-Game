@@ -1,6 +1,14 @@
 // src/features/game/components/GameInterface.tsx
 import { useGameLogic } from "../hooks/useGameLogic";
-import { Loader2, CheckCircle, XCircle, Flame, Trophy, HelpCircle } from "lucide-react";
+import {
+  Loader2,
+  CheckCircle,
+  XCircle,
+  Flame,
+  Trophy,
+  HelpCircle,
+} from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 export const GameInterface = () => {
   const {
@@ -12,7 +20,7 @@ export const GameInterface = () => {
     isLoading,
     progress,
     showHint,
-    revealHint
+    revealHint,
     // ...rest,
   } = useGameLogic();
 
@@ -44,7 +52,6 @@ export const GameInterface = () => {
     );
   }
 
-
   // ✅ HEATMAP GENERATION (Last 5 Days)
   const renderHeatmap = () => {
     return (
@@ -53,12 +60,12 @@ export const GameInterface = () => {
           const d = new Date();
           d.setDate(d.getDate() - daysAgo);
           // Simplified local date for UI
-          const dateStr = d.toISOString().split('T')[0]; 
+          const dateStr = d.toISOString().split("T")[0];
           const isSolved = progress.history[dateStr]?.solved;
           return (
-            <div 
+            <div
               key={daysAgo}
-              className={`w-3 h-3 rounded-full ${isSolved ? 'bg-green-500' : 'bg-slate-200'}`}
+              className={`w-3 h-3 rounded-full ${isSolved ? "bg-green-500" : "bg-slate-200"}`}
               title={dateStr}
             />
           );
@@ -67,22 +74,19 @@ export const GameInterface = () => {
     );
   };
 
-
   return (
-    <div className="max-w-2xl mx-auto p-4 space-y-6 animate-in fade-in duration-500">
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="max-w-2xl mx-auto p-4 space-y-6"
+    >
       {/* 1. Header & Stats */}
       <div className="flex justify-between items-center bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
-        <div className="flex justify-between bg-white p-4 rounded-xl shadow-sm border border-slate-100">
-          <div>
-            <h2 className="text-2xl font-bold text-slate-800">
-              Daily Challenge
-            </h2>
-            <div className="text-xs text-slate-400 uppercase tracking-wider">
-              {currentPuzzle.type} Puzzle
-            </div>
-            {renderHeatmap()}
+        <div>
+          <div className="text-xs text-slate-400 uppercase tracking-wider">
+            {currentPuzzle.type} Puzzle
           </div>
-          <p className="text-slate-500 text-sm">{currentPuzzle.date}</p>
+          {renderHeatmap()}
         </div>
         <div className="flex gap-4">
           <div className="flex items-center gap-1 text-orange-500 font-bold">
@@ -98,45 +102,48 @@ export const GameInterface = () => {
         </div>
       </div>
 
-      {/* 2. Puzzle Board */}
-      <div className="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden min-h-[300px] flex flex-col">
-        {/* Question Area */}
+      {/* 2. Puzzle Board (Animated) */}
+      <motion.div
+        key={currentPuzzle.id} // Re-animate when puzzle changes
+        initial={{ scale: 0.95, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        className="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden min-h-[300px] flex flex-col"
+      >
         <div className="bg-slate-50 p-8 text-center border-b border-slate-100">
-          <span className="inline-block px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-bold uppercase tracking-wide mb-3">
-            {currentPuzzle.type}
-          </span>
           <h3 className="text-3xl font-medium text-slate-800 leading-tight">
             {content.question}
           </h3>
         </div>
+        <div className="flex-1 p-8 flex flex-col items-center justify-center bg-slate-50/50">
+          {/* Visual Placeholder */}
+          <div className="opacity-20 text-6xl select-none">
+            {currentPuzzle.type === "math" && "∑"}
+            {currentPuzzle.type === "word" && "ABC"}
+            {currentPuzzle.type === "logic" && "IF"}
+            {currentPuzzle.type === "spatial" && "⬡"}
+            {currentPuzzle.type === "pattern" && "∞"}
+          </div>
 
-        <div className="text-center mt-4 h-8">
-          {!showHint ? (
-            <button
-              onClick={revealHint}
-              className="text-sm text-blue-500 hover:underline"
-            >
-              <HelpCircle className="w-4 h-4" /> Need a hint?
-            </button>
-          ) : (
-            <p className="text-sm text-slate-500 animate-in fade-in">
-              💡 Hint: {currentPuzzle.hint}
-            </p>
-          )}
+          <div className="mt-8 text-center h-8">
+            {!showHint ? (
+              <button
+                onClick={revealHint}
+                className="flex items-center gap-2 text-sm text-blue-500 hover:text-blue-600 transition-colors mx-auto"
+              >
+                <HelpCircle className="w-4 h-4" /> Need a hint?
+              </button>
+            ) : (
+              <motion.p
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="text-sm text-slate-600 font-medium bg-yellow-50 px-3 py-1 rounded-lg border border-yellow-100 inline-block"
+              >
+                💡 Hint: {currentPuzzle.hint}
+              </motion.p>
+            )}
+          </div>
         </div>
-
-        {/* Visual Puzzle Area (Placeholder for Phase 3 Grid) */}
-        <div className="flex-1 p-8 flex items-center justify-center bg-slate-50/50">
-          {currentPuzzle.type === 'math' ? (
-            <div className="w-32 h-32 rounded bg-blue-500" />
-          ) : (
-            <div className="text-slate-400 font-mono text-sm">
-              {/* Show visual hint if available, else generic icon */}
-              {currentPuzzle.type.toUpperCase()} VISUAL
-            </div>
-          )}
-        </div>
-      </div>
+      </motion.div>
 
       {/* 3. Input Controls */}
       <div className="bg-white p-4 rounded-2xl shadow-lg border border-slate-100 sticky bottom-4">
@@ -145,37 +152,26 @@ export const GameInterface = () => {
             type="text"
             value={userSolution}
             onChange={(e) => setUserSolution(e.target.value)}
-            placeholder="Enter your answer..."
+            placeholder="Answer..."
             disabled={feedback === "success"}
             onKeyDown={(e) => e.key === "Enter" && submitSolution()}
-            className="flex-1 p-4 rounded-xl bg-slate-50 border-2 border-slate-200 focus:border-blue-500 focus:bg-white focus:outline-none transition-all font-medium text-lg"
+            className="flex-1 p-4 rounded-xl bg-slate-50 border-2 border-slate-200 focus:border-blue-500 focus:outline-none font-medium text-lg"
           />
           <button
             onClick={submitSolution}
             disabled={!userSolution || feedback === "success"}
-            className={`px-8 rounded-xl font-bold text-white transition-all active:scale-95 flex items-center gap-2
-                ${
-                  feedback === "success"
-                    ? "bg-green-500"
-                    : feedback === "error"
-                      ? "bg-red-500"
-                      : "bg-blue-600 hover:bg-blue-700"
-                }`}
+            className={`px-8 rounded-xl font-bold text-white transition-all ${feedback === "success" ? "bg-green-500" : feedback === "error" ? "bg-red-500" : "bg-blue-600 hover:bg-blue-700"}`}
           >
             {feedback === "success" ? (
-              <span className="flex justify-center items-center gap-2">
-                <CheckCircle /> Solved
-              </span>
+              <CheckCircle />
             ) : feedback === "error" ? (
-              <span className="flex justify-center items-center gap-2">
-                <XCircle /> Try Again
-              </span>
+              <XCircle />
             ) : (
-              "Submit Answer"
+              "Submit"
             )}
           </button>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 };

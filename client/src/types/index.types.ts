@@ -31,6 +31,7 @@ export interface UserProgress {
     solved: boolean;
     attempts: number;
     timeTaken: number; // in seconds
+    usedHint?: boolean;
   }>;
 }
 

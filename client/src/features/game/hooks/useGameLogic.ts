@@ -42,9 +42,9 @@ export const useGameLogic = () => {
 
   const [showHint, setShowHint] = useState(false);
 
-  useEffect(() => {
-     setShowHint(false); 
-  }, [currentPuzzle]);
+  // useEffect(() => {
+  //    setShowHint(false); 
+  // }, [currentPuzzle]);
 
   const revealHint = () => setShowHint(true);
 
@@ -67,6 +67,7 @@ export const useGameLogic = () => {
         await StorageService.setItem(`puzzle_${today}`, puzzle, 'puzzle');
       }
       setCurrentPuzzle(puzzle);
+     setShowHint(false); 
 
       if (savedProgress?.history[today]?.solved) {
         setFeedback('success');
@@ -90,6 +91,7 @@ export const useGameLogic = () => {
 
       // Update Progress Logic (Phase 2 Requirement)
       setProgress(prev => {
+        if (prev.history[today]?.solved) return prev;
 
         const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
         const isConsecutive = prev.lastPlayedDate === yesterday;
@@ -107,6 +109,7 @@ export const useGameLogic = () => {
               solved: true,
               attempts: 1,
               timeTaken: 0, // Implement timer later
+              usedHint: showHint
             }
           }
         };
@@ -122,7 +125,7 @@ export const useGameLogic = () => {
       // (Optional: Update attempts in history without marking solved)
       setTimeout(() => setFeedback('idle'), 2000);
     }
-  }, [currentPuzzle, userSolution, feedback]);
+  }, [currentPuzzle, userSolution, feedback, showHint]);
 
   return {
     currentPuzzle,
@@ -133,6 +136,6 @@ export const useGameLogic = () => {
     progress,
     isLoading: gameState.loading,
     showHint,
-    revealHint
+    revealHint: () => setShowHint(true)
   };
 };

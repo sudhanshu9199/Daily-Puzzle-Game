@@ -1,23 +1,14 @@
 // src/App.tsx
 import { BrowserRouter, Routes, Route, Navigate, Outlet, useLocation } from 'react-router-dom';
 import { Suspense, lazy, useEffect } from 'react';
-import { useAuth } from './context/AuthContext';
+import { AuthProvider, useAuth } from './context/AuthContext';
 import { PageLoader } from './components/ui/Loader';
 import { AnimatePresence } from 'framer-motion';
 import { PageTransition } from './components/PageTransition';
+import { ApiService } from './services/apiServices';
 
 const Home = lazy(() => import('./pages/Home'));
 const AuthPage = lazy(() => import('./pages/Auth'));
-
-useEffect(() => {
-  if (user) {
-    ApiService.syncProgress(user.uid, {
-      email: user.email,
-      currentStreak: 5,
-      history: {} 
-    }).then(console.log).catch(console.error);
-  }
-}, [user]);
 
 // 1. Only allow access if user is logged in
 const ProtectedRoute = () => {
@@ -33,8 +24,27 @@ const PublicRoute = () => {
   return user ? <Navigate to="/" replace /> : <Outlet />;
 };
 
+
+
+
 const AnimatedRoutes = () => {
   const location = useLocation();
+
+  const { user } = useAuth();
+
+  // Global Sync Logic: Runs whenever the user logs in
+  useEffect(() => {
+    if (user) {
+      ApiService.syncProgress(user.uid, {
+        email: user.email,
+        displayName: user.displayName, // Send display name too
+        currentStreak: 5, // Example data
+        history: {} 
+      })
+      .then((res) => console.log("Sync success:", res))
+      .catch((err) => console.error("Sync failed:", err));
+    }
+  }, [user]);
   
   return (
     <AnimatePresence mode="wait">

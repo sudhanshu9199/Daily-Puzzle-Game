@@ -1,5 +1,5 @@
 // src/features/game/utils/validator.ts
-import { Puzzle } from "../../../types/index.types";
+import type { Puzzle } from "../../../types/index.types";
 
 export const validateSolution = (puzzle: Puzzle, userInput: string): boolean => {
   if (!userInput) return false;

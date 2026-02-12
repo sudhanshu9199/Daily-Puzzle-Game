@@ -1,13 +1,13 @@
 // src/services/firebaseServices.ts
-import { initializeApp, FirebaseApp, getApp, getApps } from "firebase/app";
+import { initializeApp, type FirebaseApp, getApp, getApps } from "firebase/app";
 import { 
   getAuth, 
   GoogleAuthProvider, 
   signInWithPopup, 
   signOut, 
   onAuthStateChanged,
-  User,
-  Auth
+  type User,
+  type Auth
 } from "firebase/auth";
 
 // Strict type checking for env variables to prevent runtime crashes
@@ -29,17 +29,6 @@ const firebaseConfig = {
   appId: getEnvVar("VITE_FIREBASE_APP_ID"),
   measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
 };
-
-// Initialize Firebase only once
-// let app: FirebaseApp = initializeApp(firebaseConfig);
-// let auth: Auth = getAuth(app);
-
-// try {
-//   app = initializeApp(firebaseConfig);
-//   auth = getAuth(app);
-// } catch (error) {
-//   console.error("Firebase initialization error:", error);
-// }
 
 let app: FirebaseApp;
 if (getApps().length === 0) {

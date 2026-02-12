@@ -1,7 +1,6 @@
 // src/App.tsx
 import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import { Suspense, lazy } from 'react';
-import { Loader2 } from 'lucide-react';
 import { useAuth } from './context/AuthContext';
 import { PageLoader } from './components/ui/Loader';
 
@@ -36,7 +35,6 @@ function App() {
             {/* Protected Game Routes */}
             <Route element={<ProtectedRoute />}>
               <Route path="/" element={<Home />} />
-              {/* Phase 2: Add Game Route here later */}
             </Route>
 
             {/* 404 Catch-all */}

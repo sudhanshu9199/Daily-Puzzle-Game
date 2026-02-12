@@ -1,6 +1,6 @@
 // src/context/AuthContext.tsx
-import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import { User } from 'firebase/auth';
+import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
+import type { User } from 'firebase/auth';
 import { AuthService } from '../services/firebaseServices';
 import { StorageService } from '../services/storageServices';
 

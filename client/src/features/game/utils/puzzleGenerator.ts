@@ -1,5 +1,5 @@
 // puzzleGenerator.ts
-import { Puzzle, PuzzleType } from "../../../types/index.types";
+import type { Puzzle, PuzzleType } from "../../../types/index.types";
 
 // Simple seeded random number generator
 const seededRandom = (seed: number) => {

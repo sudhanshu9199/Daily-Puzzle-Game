@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { StorageService } from '../../../services/storageServices';
-import { Puzzle, GameState, UserProgress } from '../../../types/index.types';
+import type { Puzzle, GameState, UserProgress } from '../../../types/index.types';
 import { generateDailyPuzzle } from '../utils/puzzleGenerator';
 import { validateSolution } from '../utils/validator';
 
@@ -36,7 +36,6 @@ export const useGameLogic = () => {
   const [progress, setProgress] = useState<UserProgress>(INITIAL_PROGRESS);
   const [showHint, setShowHint] = useState(false);
 
-  const revealHint = () => setShowHint(true);
 
   // Load Game State on Mount
   useEffect(() => {
@@ -69,6 +68,9 @@ export const useGameLogic = () => {
 
     initGame();
   }, []);
+
+  const revealHint = () => setShowHint(true);
+
 
   const submitSolution = useCallback(async () => {
     if (!currentPuzzle || feedback === 'success') return;

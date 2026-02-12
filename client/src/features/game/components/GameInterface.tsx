@@ -55,7 +55,6 @@ export const GameInterface = () => {
           // Simplified local date for UI
           const dateStr = d.toISOString().split('T')[0]; 
           const isSolved = progress.history[dateStr]?.solved;
-          
           return (
             <div 
               key={daysAgo}
@@ -67,7 +66,6 @@ export const GameInterface = () => {
       </div>
     );
   };
-
 
 
   return (
@@ -129,7 +127,7 @@ export const GameInterface = () => {
 
         {/* Visual Puzzle Area (Placeholder for Phase 3 Grid) */}
         <div className="flex-1 p-8 flex items-center justify-center bg-slate-50/50">
-          {currentPuzzle.type === "color" ? (
+          {currentPuzzle.type === 'math' ? (
             <div className="w-32 h-32 rounded bg-blue-500" />
           ) : (
             <div className="text-slate-400 font-mono text-sm">

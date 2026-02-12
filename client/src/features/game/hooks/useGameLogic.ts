@@ -6,14 +6,9 @@ import { Puzzle, GameState, UserProgress } from '../../../types/index.types';
 import { generateDailyPuzzle } from '../utils/puzzleGenerator';
 import { validateSolution } from '../utils/validator';
 
-// const getTodayDateString = () => new Date().toISOString().split('T')[0];
-
-
-
 const getTodayDateString = () => {
   const date = new Date();
-//   Local timeZone (eg. IST)
-  const offset = date.getTimezoneOffset() * 60000; // Offset in milliseconds
+  const offset = date.getTimezoneOffset() * 60000;
   return new Date(date.getTime() - offset).toISOString().split('T')[0];
 };
 
@@ -39,12 +34,7 @@ export const useGameLogic = () => {
   const [userSolution, setUserSolution] = useState<string>("");
   const [feedback, setFeedback] = useState<'idle' | 'success' | 'error'>('idle');
   const [progress, setProgress] = useState<UserProgress>(INITIAL_PROGRESS);
-
   const [showHint, setShowHint] = useState(false);
-
-  // useEffect(() => {
-  //    setShowHint(false); 
-  // }, [currentPuzzle]);
 
   const revealHint = () => setShowHint(true);
 
@@ -121,8 +111,6 @@ export const useGameLogic = () => {
 
     } else {
       setFeedback('error');
-      // Track failed attempt
-      // (Optional: Update attempts in history without marking solved)
       setTimeout(() => setFeedback('idle'), 2000);
     }
   }, [currentPuzzle, userSolution, feedback, showHint]);

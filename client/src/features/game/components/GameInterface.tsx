@@ -1,6 +1,6 @@
 // src/features/game/components/GameInterface.tsx
 import { useGameLogic } from "../hooks/useGameLogic";
-import { Loader2, CheckCircle, XCircle, Flame, Trophy } from "lucide-react";
+import { Loader2, CheckCircle, XCircle, Flame, Trophy, HelpCircle } from "lucide-react";
 
 export const GameInterface = () => {
   const {
@@ -118,7 +118,7 @@ export const GameInterface = () => {
               onClick={revealHint}
               className="text-sm text-blue-500 hover:underline"
             >
-              Need a hint?
+              <HelpCircle className="w-4 h-4" /> Need a hint?
             </button>
           ) : (
             <p className="text-sm text-slate-500 animate-in fade-in">

@@ -6,7 +6,16 @@ import { Puzzle, GameState, UserProgress } from '../../../types/index.types';
 import { generateDailyPuzzle } from '../utils/puzzleGenerator';
 import { validateSolution } from '../utils/validator';
 
-const getTodayDateString = () => new Date().toISOString().split('T')[0];
+// const getTodayDateString = () => new Date().toISOString().split('T')[0];
+
+
+
+const getTodayDateString = () => {
+  const date = new Date();
+  const offset = date.getTimezoneOffset() * 60000; // Offset in milliseconds
+  return new Date(date.getTime() - offset).toISOString().split('T')[0];
+};
+
 
 const INITIAL_GAME_STATE: GameState = {
   currentDate: getTodayDateString(), // Helper needed

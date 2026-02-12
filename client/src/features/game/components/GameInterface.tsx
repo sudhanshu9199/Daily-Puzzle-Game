@@ -11,7 +11,9 @@ export const GameInterface = () => {
     feedback,
     isLoading,
     progress,
-    ...rest
+    showHint,
+    revealHint
+    // ...rest,
   } = useGameLogic();
 
   if (isLoading) {
@@ -30,7 +32,6 @@ export const GameInterface = () => {
     );
   }
 
-  //   const content = JSON.parse(currentPuzzle.content);
   let content;
   try {
     content = JSON.parse(currentPuzzle.content);
@@ -82,6 +83,21 @@ export const GameInterface = () => {
           <h3 className="text-3xl font-medium text-slate-800 leading-tight">
             {content.question}
           </h3>
+        </div>
+
+        <div className="text-center mt-4 h-8">
+          {!showHint ? (
+            <button
+              onClick={revealHint}
+              className="text-sm text-blue-500 hover:underline"
+            >
+              Need a hint?
+            </button>
+          ) : (
+            <p className="text-sm text-slate-500 animate-in fade-in">
+              💡 Hint: {currentPuzzle.hint}
+            </p>
+          )}
         </div>
 
         {/* Visual Puzzle Area (Placeholder for Phase 3 Grid) */}

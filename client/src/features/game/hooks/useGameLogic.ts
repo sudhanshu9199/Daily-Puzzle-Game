@@ -12,6 +12,7 @@ import { validateSolution } from '../utils/validator';
 
 const getTodayDateString = () => {
   const date = new Date();
+//   Local timeZone (eg. IST)
   const offset = date.getTimezoneOffset() * 60000; // Offset in milliseconds
   return new Date(date.getTime() - offset).toISOString().split('T')[0];
 };
@@ -38,6 +39,14 @@ export const useGameLogic = () => {
   const [userSolution, setUserSolution] = useState<string>("");
   const [feedback, setFeedback] = useState<'idle' | 'success' | 'error'>('idle');
   const [progress, setProgress] = useState<UserProgress>(INITIAL_PROGRESS);
+
+  const [showHint, setShowHint] = useState(false);
+
+  useEffect(() => {
+     setShowHint(false); 
+  }, [currentPuzzle]);
+
+  const revealHint = () => setShowHint(true);
 
   // Load Game State on Mount
   useEffect(() => {
@@ -122,6 +131,8 @@ export const useGameLogic = () => {
     submitSolution,
     feedback,
     progress,
-    isLoading: gameState.loading
+    isLoading: gameState.loading,
+    showHint,
+    revealHint
   };
 };

@@ -18,6 +18,7 @@ export interface Puzzle {
   content: string; // JSON stringified puzzle data or specific structure
   solution: string; // Hashed solution or direct value depending on security needs
   seed: number; // For procedural generation
+  hint: String;
 }
 
 export interface UserProgress {

@@ -1,0 +1,35 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          String   @id // This will match Firebase UID
+  email       String   @unique
+  displayName String?
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  progress    Progress?
+
+  @@map("users")
+}
+
+model Progress {
+  id             String   @id @default(uuid())
+  userId         String   @unique @map("user_id")
+  currentStreak  Int      @default(0) @map("current_streak")
+  maxStreak      Int      @default(0) @map("max_streak")
+  lastPlayedDate DateTime? @map("last_played_date") // Store as Date or String depending on preference
+  totalSolved    Int      @default(0) @map("total_solved")
+  history        Json     // Stores the detailed history object from your frontend types
+  
+  user           User     @relation(fields: [userId], references: [id])
+
+  @@map("progress")
+}

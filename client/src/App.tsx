@@ -1,6 +1,6 @@
 // src/App.tsx
 import { BrowserRouter, Routes, Route, Navigate, Outlet, useLocation } from 'react-router-dom';
-import { Suspense, lazy } from 'react';
+import { Suspense, lazy, useEffect } from 'react';
 import { useAuth } from './context/AuthContext';
 import { PageLoader } from './components/ui/Loader';
 import { AnimatePresence } from 'framer-motion';
@@ -8,6 +8,16 @@ import { PageTransition } from './components/PageTransition';
 
 const Home = lazy(() => import('./pages/Home'));
 const AuthPage = lazy(() => import('./pages/Auth'));
+
+useEffect(() => {
+  if (user) {
+    ApiService.syncProgress(user.uid, {
+      email: user.email,
+      currentStreak: 5,
+      history: {} 
+    }).then(console.log).catch(console.error);
+  }
+}, [user]);
 
 // 1. Only allow access if user is logged in
 const ProtectedRoute = () => {

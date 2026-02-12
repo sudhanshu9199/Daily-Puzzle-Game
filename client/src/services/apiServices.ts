@@ -26,7 +26,7 @@ export const ApiService = {
     return request<{ success: boolean; syncedAt: string }>('/sync', {
       method: 'POST',
       body: JSON.stringify({
-        user_id: userId, // SQL naming convention (snake_case)
+        userId, // SQL naming convention (snake_case)
         ...data
       }),
     });

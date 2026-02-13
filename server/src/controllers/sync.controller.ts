@@ -10,7 +10,7 @@ export const syncUserProgress = async (req: Request, res: Response): Promise<voi
       res.status(401).json({ message: "userId is required" });
       return;
     }
-    const { currentStreak, maxStreak, lastPlayedDate, totalSolved, history, email, displayName } = req.body;
+    const { currentStreak, maxStreak, lastPlayedDate, totalSolved, history, displayName } = req.body;
 
 
     // Use a Transaction for data integrity

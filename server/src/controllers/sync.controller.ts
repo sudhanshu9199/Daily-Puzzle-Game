@@ -1,24 +1,30 @@
 import { Request, Response } from 'express';
-import { prisma } from '../config/prisma'; // Import the singleton instance
+import { prisma } from '../config/prisma';
 
 export const syncUserProgress = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { userId, currentStreak, maxStreak, lastPlayedDate, totalSolved, history, email, displayName } = req.body;
-
+    const userId = req.user?.uid;
+    const userEmail = req.user?.email;
+    
     if (!userId) {
-      res.status(400).json({ message: "userId is required" });
+      res.status(401).json({ message: "userId is required" });
       return;
     }
+    const { currentStreak, maxStreak, lastPlayedDate, totalSolved, history, email, displayName } = req.body;
+
 
     // Use a Transaction for data integrity
     await prisma.$transaction(async (tx) => {
       // 1. Upsert User
       await tx.user.upsert({
         where: { id: userId },
-        update: { email, displayName },
+        update: { 
+            email: userEmail || "unknown@example.com",
+            displayName
+         },
         create: { 
           id: userId, 
-          email: email || "unknown@example.com", 
+          email: userEmail || "unknown@example.com", 
           displayName 
         }
       });

@@ -1,11 +1,13 @@
 // src/services/api.services.ts
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 async function request<T>(endpoint: string, options?: RequestInit): Promise<T> {
   try {
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json',
+        ...options?.headers
+       },
       ...options,
     });
 
@@ -22,31 +24,13 @@ async function request<T>(endpoint: string, options?: RequestInit): Promise<T> {
 }
 
 export const ApiService = {
-  syncProgress: (userId: string, data: any) => {
+  syncProgress: (token: string, data: any) => {
     return request<{ success: boolean; syncedAt: string }>('/sync', {
       method: 'POST',
-      body: JSON.stringify({
-        userId, // SQL naming convention (snake_case)
-        ...data
-      }),
+      headers: {
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify(data),
     });
   }
 };
-
-
-// export const ApiService = {
-//   // Example: We will use this later to sync progress to Neon
-//   syncProgress: async (userId: string, data: any) => {
-//     try {
-//       const response = await fetch(`${API_BASE_URL}/sync`, {
-//         method: 'POST',
-//         headers: { 'Content-Type': 'application/json' },
-//         body: JSON.stringify({ userId, data }),
-//       });
-//       return await response.json();
-//     } catch (error) {
-//       console.error("Sync failed:", error);
-//       throw error;
-//     }
-//   }
-// };

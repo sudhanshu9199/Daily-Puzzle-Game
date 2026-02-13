@@ -1,32 +1,41 @@
-import { Request, Response } from 'express';
-import { prisma } from '../config/prisma';
+import { Request, Response } from "express";
+import { prisma } from "../config/prisma";
 
-export const syncUserProgress = async (req: Request, res: Response): Promise<void> => {
+export const syncUserProgress = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
   try {
     const userId = req.user?.uid;
     const userEmail = req.user?.email;
-    
+
     if (!userId) {
       res.status(401).json({ message: "userId is required" });
       return;
     }
-    const { currentStreak, maxStreak, lastPlayedDate, totalSolved, history, displayName } = req.body;
-
+    const {
+      currentStreak,
+      maxStreak,
+      lastPlayedDate,
+      totalSolved,
+      history,
+      displayName,
+    } = req.body;
 
     // Use a Transaction for data integrity
     await prisma.$transaction(async (tx) => {
       // 1. Upsert User
       await tx.user.upsert({
         where: { id: userId },
-        update: { 
-            email: userEmail || "unknown@example.com",
-            displayName
-         },
-        create: { 
-          id: userId, 
-          email: userEmail || "unknown@example.com", 
-          displayName 
-        }
+        update: {
+          email: userEmail || "unknown@example.com",
+          displayName,
+        },
+        create: {
+          id: userId,
+          email: userEmail || "unknown@example.com",
+          displayName,
+        },
       });
 
       // 2. Upsert Progress
@@ -37,7 +46,7 @@ export const syncUserProgress = async (req: Request, res: Response): Promise<voi
           maxStreak,
           lastPlayedDate: lastPlayedDate ? new Date(lastPlayedDate) : null,
           totalSolved,
-          history: history || {} 
+          history: history || {},
         },
         create: {
           userId,
@@ -45,14 +54,43 @@ export const syncUserProgress = async (req: Request, res: Response): Promise<voi
           maxStreak,
           lastPlayedDate: lastPlayedDate ? new Date(lastPlayedDate) : null,
           totalSolved,
-          history: history || {}
-        }
+          history: history || {},
+        },
       });
     });
 
     res.json({ success: true, syncedAt: new Date().toISOString() });
   } catch (error) {
     console.error("Sync Error:", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+export const getUserProgress = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
+  try {
+    const userId = req.user?.uid;
+
+    if (!userId) {
+      res.status(401).json({ message: "userId is required" });
+      return;
+    }
+
+    const progress = await prisma.progress.findUnique({
+      where: { userId: userId },
+    });
+
+    if (!progress) {
+      // It's okay if no progress exists yet, return null or empty default
+      res.json({ data: null });
+      return;
+    }
+
+    res.json({ data: progress });
+  } catch (error) {
+    console.error("Get Progress Error:", error);
     res.status(500).json({ message: "Internal Server Error" });
   }
 };

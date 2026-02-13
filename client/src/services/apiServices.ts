@@ -6,7 +6,7 @@ async function request<T>(endpoint: string, options?: RequestInit): Promise<T> {
   try {
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
       ...options,
-      headers: { 
+      headers: {
         'Content-Type': 'application/json',
         ...options?.headers,
        },
@@ -32,6 +32,13 @@ export const ApiService = {
         'Authorization': `Bearer ${token}`
       },
       body: JSON.stringify(data),
+    });
+  },
+
+  getUserProgress: (token: string) => {
+    return request<{ data: any }>('/sync', {
+      method: 'GET',
+      headers: { 'Authorization': `Bearer ${token}` },
     });
   }
 };

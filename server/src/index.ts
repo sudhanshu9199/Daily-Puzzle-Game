@@ -13,7 +13,7 @@ const PORT = process.env.PORT || 5000;
 // Middleware
 app.use(helmet());
 app.use(cors({
-    origin: 'http://localhost:5173', // Allow your Vite frontend
+    origin: process.env.CLIENT_URL || 'http://localhost:5173', // Allow your Vite frontend
     credentials: true
 }));
 app.use(morgan('dev'));

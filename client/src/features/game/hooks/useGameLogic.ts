@@ -2,6 +2,8 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { StorageService } from '../../../services/storageServices';
+import { ApiService } from '../../../services/apiServices';
+import { useAuth } from '../../../context/AuthContext';
 import type { Puzzle, GameState, UserProgress } from '../../../types/index.types';
 import { generateDailyPuzzle } from '../utils/puzzleGenerator';
 import { validateSolution } from '../utils/validator';
@@ -29,6 +31,7 @@ const INITIAL_PROGRESS: UserProgress = {
 };
 
 export const useGameLogic = () => {
+  const { user } = useAuth();
   const [gameState, setGameState] = useState<GameState>(INITIAL_GAME_STATE);
   const [currentPuzzle, setCurrentPuzzle] = useState<Puzzle | null>(null);
   const [userSolution, setUserSolution] = useState<string>("");
@@ -42,8 +45,28 @@ export const useGameLogic = () => {
     const initGame = async () => {
       const today = getTodayDateString();
 
-      const savedProgress = await StorageService.getItem<UserProgress>('user_progress', 'user');
-      if (savedProgress) setProgress(savedProgress);
+      let currentProgress =
+        (await StorageService.getItem<UserProgress>('user_progress', 'user')) ||
+        INITIAL_PROGRESS;
+
+        if (user) {
+        try {
+          const token = await user.getIdToken();
+          const { data: cloudProgress } = await ApiService.getUserProgress(token);
+
+          if (
+            cloudProgress &&
+            cloudProgress.totalSolved > currentProgress.totalSolved
+          ) {
+            currentProgress = { ...currentProgress, ...cloudProgress };
+            await StorageService.setItem('user_progress', currentProgress, 'user');
+          }
+        } catch (err) {
+          console.warn("Cloud fetch failed → using local", err);
+        }
+      }
+
+      setProgress(currentProgress);
       
       // 1. Try to get today's puzzle from Cache (Offline First)
       let puzzle = await StorageService.getItem<Puzzle>(`puzzle_${today}`, 'puzzle');
@@ -58,7 +81,7 @@ export const useGameLogic = () => {
       setCurrentPuzzle(puzzle);
      setShowHint(false); 
 
-      if (savedProgress?.history[today]?.solved) {
+      if (currentProgress.history[today]?.solved) {
         setFeedback('success');
         setUserSolution(puzzle.solution); // Optional: Reveal answer
       }
@@ -67,7 +90,7 @@ export const useGameLogic = () => {
     };
 
     initGame();
-  }, []);
+  }, [user]);
 
   const revealHint = () => setShowHint(true);
 
@@ -91,6 +114,7 @@ export const useGameLogic = () => {
         
         const newProgress: UserProgress = {
           ...prev,
+          userId: user?.uid || 'local-user',
           currentStreak: newStreak,
           maxStreak: Math.max(prev.maxStreak, newStreak),
           lastPlayedDate: today,
@@ -108,6 +132,15 @@ export const useGameLogic = () => {
         
         // Async Save
         StorageService.setItem('user_progress', newProgress, 'user');
+
+        if (user) {
+          user.getIdToken().then(token => {
+             ApiService.syncProgress(token, {
+                 ...newProgress,
+                 displayName: user.displayName // Optional: Update name on sync
+             }).catch(err => console.error("Cloud Sync Failed:", err));
+          });
+        }
         return newProgress;
       });
 
@@ -115,7 +148,7 @@ export const useGameLogic = () => {
       setFeedback('error');
       setTimeout(() => setFeedback('idle'), 2000);
     }
-  }, [currentPuzzle, userSolution, feedback, showHint]);
+  }, [currentPuzzle, userSolution, feedback, showHint, user]);
 
   return {
     currentPuzzle,

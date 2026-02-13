@@ -1,7 +1,5 @@
 import { Request, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import { prisma } from '../config/prisma'; // Import the singleton instance
 
 export const syncUserProgress = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -12,36 +10,38 @@ export const syncUserProgress = async (req: Request, res: Response): Promise<voi
       return;
     }
 
-    // 1. Ensure User Exists (Upsert = Update if exists, Insert if not)
-    // We update email/name just in case they changed in Firebase
-    await prisma.user.upsert({
-      where: { id: userId },
-      update: { email, displayName },
-      create: { 
-        id: userId, 
-        email: email || "unknown@example.com", // Fallback if email is missing
-        displayName 
-      }
-    });
+    // Use a Transaction for data integrity
+    await prisma.$transaction(async (tx) => {
+      // 1. Upsert User
+      await tx.user.upsert({
+        where: { id: userId },
+        update: { email, displayName },
+        create: { 
+          id: userId, 
+          email: email || "unknown@example.com", 
+          displayName 
+        }
+      });
 
-    // 2. Update Progress
-    const updatedProgress = await prisma.progress.upsert({
-      where: { userId: userId },
-      update: {
-        currentStreak,
-        maxStreak,
-        lastPlayedDate: lastPlayedDate ? new Date(lastPlayedDate) : null,
-        totalSolved,
-        history: history || {} // Ensure valid JSON
-      },
-      create: {
-        userId,
-        currentStreak,
-        maxStreak,
-        lastPlayedDate: lastPlayedDate ? new Date(lastPlayedDate) : null,
-        totalSolved,
-        history: history || {}
-      }
+      // 2. Upsert Progress
+      await tx.progress.upsert({
+        where: { userId: userId },
+        update: {
+          currentStreak,
+          maxStreak,
+          lastPlayedDate: lastPlayedDate ? new Date(lastPlayedDate) : null,
+          totalSolved,
+          history: history || {} 
+        },
+        create: {
+          userId,
+          currentStreak,
+          maxStreak,
+          lastPlayedDate: lastPlayedDate ? new Date(lastPlayedDate) : null,
+          totalSolved,
+          history: history || {}
+        }
+      });
     });
 
     res.json({ success: true, syncedAt: new Date().toISOString() });

@@ -1,5 +1,15 @@
 import { Request, Response } from "express";
 import { prisma } from "../config/prisma";
+import { z } from 'zod';
+
+const syncSchema = z.object({
+  currentStreak: z.number().int().nonnegative(),
+  maxStreak: z.number().int().nonnegative(),
+  lastPlayedDate: z.string().nullable().optional(),
+  totalSolved: z.number().int().nonnegative(),
+  history: z.record(z.any()).optional(), // Validates it's an object
+  displayName: z.string().nullable().optional(),
+});
 
 export const syncUserProgress = async (
   req: Request,
@@ -13,6 +23,14 @@ export const syncUserProgress = async (
       res.status(401).json({ message: "userId is required" });
       return;
     }
+
+    const validation = syncSchema.safeParse(req.body);
+    
+    if (!validation.success) {
+       res.status(400).json({ message: "Invalid data format", errors: validation.error.format() });
+       return;
+    }
+
     const {
       currentStreak,
       maxStreak,
@@ -20,7 +38,7 @@ export const syncUserProgress = async (
       totalSolved,
       history,
       displayName,
-    } = req.body;
+    } = validation.data;
 
     // Use a Transaction for data integrity
     await prisma.$transaction(async (tx) => {
@@ -83,12 +101,11 @@ export const getUserProgress = async (
     });
 
     if (!progress) {
-      // It's okay if no progress exists yet, return null or empty default
       res.json({ data: null });
       return;
     }
 
-    res.json({ data: progress });
+    res.json({ data: progress || null });
   } catch (error) {
     console.error("Get Progress Error:", error);
     res.status(500).json({ message: "Internal Server Error" });

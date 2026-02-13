@@ -1,11 +1,11 @@
+import dotenv from 'dotenv';
+dotenv.config();
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
-import dotenv from 'dotenv';
 import syncRoutes from './routes/sync.routes';
 
-dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;

@@ -13,6 +13,7 @@ import { PageLoader } from "./components/ui/Loader";
 import { AnimatePresence } from "framer-motion";
 import { PageTransition } from "./components/PageTransition";
 import { ApiService } from "./services/apiServices";
+import { StorageService } from "./services/storageServices";
 
 const Home = lazy(() => import("./pages/Home"));
 const AuthPage = lazy(() => import("./pages/Auth"));
@@ -27,12 +28,21 @@ const DataSyncer = () => {
         try {
           const token = await user.getIdToken();
 
-          await ApiService.syncProgress(token, {
-            email: user.email,
-            displayName: user.displayName, // Send display name too
-            currentStreak: 5, // Example data
-            history: {},
-          });
+          const localData = await StorageService.getItem<any>('user_progress', 'user');
+
+          // 2. 🟢 Prepare Payload that matches Zod Schema perfectly
+          const payload = {
+            displayName: user.displayName,
+            // Required fields: Use local data OR default to 0 (Fixes 400 Error)
+            currentStreak: localData?.currentStreak || 0,
+            maxStreak: localData?.maxStreak || 0,
+            totalSolved: localData?.totalSolved || 0,
+            // Optional fields
+            history: localData?.history || {},
+            lastPlayedDate: localData?.lastPlayedDate || null,
+          };
+
+          await ApiService.syncProgress(token, payload);
           console.log("Sync success ✅");
         } catch (err) {
           console.error("Sync failed ❌:", err);

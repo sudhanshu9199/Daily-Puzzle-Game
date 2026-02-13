@@ -7,7 +7,7 @@ const syncSchema = z.object({
   maxStreak: z.number().int().nonnegative(),
   lastPlayedDate: z.string().nullable().optional(),
   totalSolved: z.number().int().nonnegative(),
-  history: z.record(z.any()).optional(), // Validates it's an object
+  history: z.record(z.string(), z.any()).optional(),
   displayName: z.string().nullable().optional(),
 });
 
@@ -64,7 +64,7 @@ export const syncUserProgress = async (
           maxStreak,
           lastPlayedDate: lastPlayedDate ? new Date(lastPlayedDate) : null,
           totalSolved,
-          history: history || {},
+          history: (history as any) || {},
         },
         create: {
           userId,
@@ -72,7 +72,7 @@ export const syncUserProgress = async (
           maxStreak,
           lastPlayedDate: lastPlayedDate ? new Date(lastPlayedDate) : null,
           totalSolved,
-          history: history || {},
+          history: (history as any) || {},
         },
       });
     });

@@ -4,6 +4,7 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
+import { apiLimiter } from './middleware/rateLimit.middleware';
 import syncRoutes from './routes/sync.routes';
 
 
@@ -17,6 +18,8 @@ app.use(cors({
     credentials: true
 }));
 app.use(morgan('dev'));
+
+app.use(apiLimiter);
 app.use(express.json()); // Parse JSON bodies
 
 // Routes

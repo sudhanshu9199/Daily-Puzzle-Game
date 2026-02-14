@@ -11,6 +11,7 @@ import {
   HelpCircle,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { StreakHeatmap } from "./StreakHeatmap";
 
 export const GameInterface = () => {
   const {
@@ -60,28 +61,6 @@ export const GameInterface = () => {
     );
   }
 
-  // ✅ HEATMAP GENERATION (Last 5 Days)
-  const renderHeatmap = () => {
-    return (
-      <div className="flex gap-1">
-        {[4, 3, 2, 1, 0].map((daysAgo) => {
-          const d = new Date();
-          d.setDate(d.getDate() - daysAgo);
-          // Simplified local date for UI
-          const dateStr = d.toISOString().split("T")[0];
-          const isSolved = progress.history[dateStr]?.solved;
-          return (
-            <div
-              key={daysAgo}
-              className={`w-3 h-3 rounded-full ${isSolved ? "bg-green-500" : "bg-slate-200"}`}
-              title={dateStr}
-            />
-          );
-        })}
-      </div>
-    );
-  };
-
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -94,7 +73,6 @@ export const GameInterface = () => {
           <div className="text-xs text-slate-400 uppercase tracking-wider">
             {currentPuzzle.type} Puzzle
           </div>
-          {renderHeatmap()}
         </div>
         <div className="flex gap-4">
           <div className="flex items-center gap-1 text-orange-500 font-bold">
@@ -107,6 +85,11 @@ export const GameInterface = () => {
             <Trophy />
             <span>{progress.totalSolved}</span>
           </div>
+        </div>
+
+        <div className="pt-2 border-t border-slate-50">
+            {/* Pass the history object to the component */}
+            <StreakHeatmap history={progress.history} /> 
         </div>
       </div>
 

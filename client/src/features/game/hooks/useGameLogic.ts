@@ -1,6 +1,6 @@
 // useGameLogic.ts
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { StorageService } from '../../../services/storageServices';
 import { ApiService } from '../../../services/apiServices';
 import { useAuth } from '../../../context/AuthContext';
@@ -39,6 +39,39 @@ export const useGameLogic = () => {
   const [progress, setProgress] = useState<UserProgress>(INITIAL_PROGRESS);
   const [showHint, setShowHint] = useState(false);
 
+
+  const puzzlesSolvedSession = useRef(0);
+  const isDirty = useRef(false);
+  const latestProgress = useRef(progress);
+
+  useEffect(() => {
+    latestProgress.current = progress;
+  }, [progress]);
+
+  const syncToCloud = useCallback(async (progressData: UserProgress) => {
+    if (!user) return;
+    try {
+      const token = await user.getIdToken();
+      await ApiService.syncProgress(token, {
+        ...progressData,
+        displayName: user.displayName
+      });
+      isDirty.current = false;
+      console.log('☁️ Progress synced to cloud');
+    } catch (err) {
+      console.error('Cloud Sync Failed:', err);
+    }
+  }, [user]);
+
+
+  useEffect(() => {
+    return () => {
+      if (isDirty.current && user) {
+        console.log('🔄 Unmount detected, syncing pending progress...');
+        syncToCloud(latestProgress.current);
+      }
+    };
+  }, [user, syncToCloud]);
 
   // Load Game State on Mount
   useEffect(() => {
@@ -79,7 +112,7 @@ export const useGameLogic = () => {
         await StorageService.setItem(`puzzle_${today}`, puzzle, 'puzzle');
       }
       setCurrentPuzzle(puzzle);
-     setShowHint(false); 
+     setShowHint(false);
 
       if (currentProgress.history[today]?.solved) {
         setFeedback('success');
@@ -104,51 +137,47 @@ export const useGameLogic = () => {
     if (isCorrect) {
       setFeedback('success');
 
+      if (progress.history[today]?.solved) return; // hello
+      const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+      const isConsecutive = progress.lastPlayedDate === yesterday;
+      const newStreak = isConsecutive ? progress.currentStreak + 1 : 1;
       // Update Progress Logic (Phase 2 Requirement)
-      setProgress(prev => {
-        if (prev.history[today]?.solved) return prev;
 
-        const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
-        const isConsecutive = prev.lastPlayedDate === yesterday;
-        const newStreak = isConsecutive ? prev.currentStreak + 1 : 1;
-        
-        const newProgress: UserProgress = {
-          ...prev,
-          userId: user?.uid || 'local-user',
-          currentStreak: newStreak,
-          maxStreak: Math.max(prev.maxStreak, newStreak),
-          lastPlayedDate: today,
-          totalSolved: prev.totalSolved + 1,
-          history: {
-            ...prev.history,
-            [today]: {
-              solved: true,
-              attempts: 1,
-              timeTaken: 0, // Implement timer later
-              usedHint: showHint
-            }
+      const newProgress: UserProgress = {
+
+        ...progress,
+        userId: user?.uid || 'local-user',
+        currentStreak: newStreak,
+        maxStreak: Math.max(progress.maxStreak, newStreak),
+        lastPlayedDate: today,
+        totalSolved: progress.totalSolved + 1,
+        history: {
+          ...progress.history,
+          [today]: {
+            solved: true,
+            attempts: 1,
+            timeTaken: 0, // Implement timer later
+            usedHint: showHint
           }
-        };
-        
-        // Async Save
-        StorageService.setItem('user_progress', newProgress, 'user');
-
-        if (user) {
-          user.getIdToken().then(token => {
-             ApiService.syncProgress(token, {
-                 ...newProgress,
-                 displayName: user.displayName // Optional: Update name on sync
-             }).catch(err => console.error("Cloud Sync Failed:", err));
-          });
         }
-        return newProgress;
-      });
+      }
+      setProgress(newProgress);
+      StorageService.setItem('user_progress', newProgress, 'user');
+      if (user) {
 
+        puzzlesSolvedSession.current += 1;
+        isDirty.current = true;
+
+        if (puzzlesSolvedSession.current % 5 === 0) {
+          console.log('📦 Batch limit reached (5), triggering sync...');
+          syncToCloud(newProgress);
+        }
+      }
     } else {
       setFeedback('error');
       setTimeout(() => setFeedback('idle'), 2000);
     }
-  }, [currentPuzzle, userSolution, feedback, showHint, user]);
+  }, [currentPuzzle, userSolution, feedback, showHint, user, syncToCloud, progress]);
 
   return {
     currentPuzzle,

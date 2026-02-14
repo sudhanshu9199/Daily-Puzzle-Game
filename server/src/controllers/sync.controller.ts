@@ -40,18 +40,19 @@ export const syncUserProgress = async (
       displayName,
     } = validation.data;
 
+    const safeEmail = userEmail || `missing-${userId}@daily-puzzle.com`;
     // Use a Transaction for data integrity
     await prisma.$transaction(async (tx) => {
       // 1. Upsert User
       await tx.user.upsert({
         where: { id: userId },
         update: {
-          email: userEmail || "unknown@example.com",
+          email: safeEmail,
           displayName,
         },
         create: {
           id: userId,
-          email: userEmail || "unknown@example.com",
+          email: safeEmail,
           displayName,
         },
       });

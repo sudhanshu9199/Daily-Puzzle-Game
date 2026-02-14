@@ -68,29 +68,33 @@ export const GameInterface = () => {
       className="max-w-2xl mx-auto p-4 space-y-6"
     >
       {/* 1. Header & Stats */}
-      <div className="flex justify-between items-center bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
-        <div>
-          <div className="text-xs text-slate-400 uppercase tracking-wider">
-            {currentPuzzle.type} Puzzle
-          </div>
-        </div>
-        <div className="flex gap-4">
-          <div className="flex items-center gap-1 text-orange-500 font-bold">
-            <Flame
-              className={progress.currentStreak > 0 ? "fill-orange-500" : ""}
-            />
-            <span>{progress.currentStreak}</span>
-          </div>
-          <div className="flex items-center gap-1 text-yellow-600 font-bold">
-            <Trophy />
-            <span>{progress.totalSolved}</span>
-          </div>
+      <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex flex-col gap-4">
+        
+        {/* Top Row: Title and Counters */}
+        <div className="flex justify-between items-center">
+            <div>
+              <div className="text-xs text-slate-400 uppercase tracking-wider font-bold">
+                {currentPuzzle.type} Puzzle
+              </div>
+            </div>
+            
+            <div className="flex gap-4">
+              <div className="flex items-center gap-1 text-orange-500 font-bold">
+                <Flame className={progress.currentStreak > 0 ? "fill-orange-500" : ""} />
+                <span>{progress.currentStreak}</span>
+              </div>
+              <div className="flex items-center gap-1 text-yellow-600 font-bold">
+                <Trophy />
+                <span>{progress.totalSolved}</span>
+              </div>
+            </div>
         </div>
 
-        <div className="pt-2 border-t border-slate-50">
-            {/* Pass the history object to the component */}
+        {/* Bottom Row: Heatmap (Full Width) */}
+        <div className="pt-2 border-t border-slate-50 w-full">
             <StreakHeatmap history={progress.history} /> 
         </div>
+
       </div>
 
       {/* 2. Puzzle Board (Animated) */}

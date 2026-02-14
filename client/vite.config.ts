@@ -104,6 +104,22 @@ export default defineConfig({
   resolve: {
     alias: { "@": path.resolve(__dirname, "./src") },
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          // Split React core to keep main bundle small
+          'vendor-react': ['react', 'react-dom', 'react-router-dom'],
+          // Split UI library (Framer Motion is large)
+          'vendor-ui': ['framer-motion'],
+          // Split Firebase (It can be huge)
+          'vendor-firebase': ['firebase/app', 'firebase/auth'],
+        }
+      }
+    },
+    // Optional: Warn if chunks exceed 500kb
+    chunkSizeWarningLimit: 500,
+  },
   server: {
     headers: {
       // This allows the Google Auth popup to communicate with your app
@@ -111,7 +127,6 @@ export default defineConfig({
       "Cross-Origin-Embedder-Policy": "unsafe-none"
     }
   },
-
   test: {
     globals: true,
     environment: "jsdom",

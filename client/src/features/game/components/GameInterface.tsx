@@ -1,4 +1,6 @@
 // src/features/game/components/GameInterface.tsx
+import { useEffect } from "react";
+import { triggerSideCannons } from "../../../utils/confetti.utils";
 import { useGameLogic } from "../hooks/useGameLogic";
 import {
   Loader2,
@@ -23,6 +25,12 @@ export const GameInterface = () => {
     revealHint,
     // ...rest,
   } = useGameLogic();
+
+  useEffect(() => {
+    if (feedback === 'success') {
+      triggerSideCannons();
+    }
+  }, [feedback]);
 
   if (isLoading) {
     return (

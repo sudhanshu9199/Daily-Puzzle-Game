@@ -20,14 +20,19 @@ export const StorageService = {
     try {
       const targetStore = store === 'puzzle' ? puzzleStore : userStore;
       const compressedData = await targetStore.getItem<string>(key);
-      if (!compressedData) return null;
+      if (compressedData === null || compressedData === undefined) return null;
 
-      const decompressedData = LZString.decompressFromUTF16(compressedData);
-      if (!decompressedData) {
-        console.warn(`Storage Warning: Failed to decompress data for key [${key}]`);
-        return null;
+      if (typeof compressedData === 'string') {
+        const decompressedData = LZString.decompressFromUTF16(compressedData);
+
+        if (decompressedData) {
+          return JSON.parse(decompressedData) as T;
+        }
+        return compressedData as unknown as T;
       }
-      return JSON.parse(decompressedData) as T;
+
+      return compressedData as T;
+
     } catch (error) {
       console.error(`Storage READ Error [${key}]:`, error);
       return null;

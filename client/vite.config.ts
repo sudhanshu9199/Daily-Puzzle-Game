@@ -81,7 +81,7 @@ export default defineConfig({
         clientsClaim: true, // Takes control of the page immediately
         skipWaiting: true, // Activates new SW version immediately
         navigateFallback: "/index.html",
-        
+
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
@@ -110,5 +110,12 @@ export default defineConfig({
       "Cross-Origin-Opener-Policy": "same-origin-allow-popups",
       "Cross-Origin-Embedder-Policy": "unsafe-none"
     }
-  }
+  },
+
+  test: {
+    globals: true,
+    environment: "jsdom",
+    setupFiles: "./src/test/setup.ts",
+    include: ["src/**/*.{test,spec}.{ts,tsx}"],
+  },
 });

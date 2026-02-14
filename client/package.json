@@ -13,6 +13,7 @@
     "@tailwindcss/vite": "^4.1.18",
     "canvas-confetti": "^1.9.4",
     "clsx": "^2.1.1",
+    "date-fns": "^4.1.0",
     "dotenv": "^17.2.4",
     "firebase": "^12.9.0",
     "framer-motion": "^12.34.0",

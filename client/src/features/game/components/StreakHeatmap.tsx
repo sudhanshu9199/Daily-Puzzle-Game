@@ -2,7 +2,7 @@
 import { useMemo } from 'react';
 import { motion } from 'framer-motion';
 import type { UserProgress } from '../../../types/index.types';
-import { getPastDates, formatReadableDate } from '../../../utils/data.utils';
+import { getPastDates, formatReadableDate } from '../../../utils/date.utils';
 
 interface StreakHeatmapProps {
   history: UserProgress['history'];

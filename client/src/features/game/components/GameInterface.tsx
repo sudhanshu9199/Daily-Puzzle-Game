@@ -156,7 +156,7 @@ export const GameInterface = () => {
             placeholder="Answer..."
             disabled={feedback === "success"}
             onKeyDown={(e) => e.key === "Enter" && submitSolution()}
-            className="flex-1 p-4 pl-6 rounded-2xl bg-[#F6F5F5] border-2 border-[#F6F5F5] text-[#222222] placeholder:text-[#BFCFE7] focus:bg-[#FFFFFF] focus:border-[#414BEA] focus:outline-none font-bold text-lg transition-all"
+            className="flex-1 p-4 pl-6 w-45 rounded-2xl bg-[#F6F5F5] border-2 border-[#F6F5F5] text-[#222222] placeholder:text-[#BFCFE7] focus:bg-[#FFFFFF] focus:border-[#414BEA] focus:outline-none font-bold text-lg transition-all"
           />
           <button
             onClick={submitSolution}

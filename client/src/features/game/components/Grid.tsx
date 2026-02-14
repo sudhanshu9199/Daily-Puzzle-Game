@@ -10,18 +10,10 @@ interface GridProps {
 export const Grid = ({ children, cols = 4 }: GridProps) => {
   return (
     <div 
-      className="grid gap-2 w-full max-w-sm mx-auto"
+      className="grid gap-3 w-full max-w-sm mx-auto p-2"
       style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}
     >
       {children}
     </div>
   );
 };
-
-// export const Grid = ({ children }: { children: ReactNode }) => {
-//   return (
-//     <div className="grid grid-cols-4 gap-3 p-4 bg-slate-100 rounded-xl shadow-inner mx-auto max-w-sm">
-//       {children}
-//     </div>
-//   );
-// };

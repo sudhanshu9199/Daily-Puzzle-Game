@@ -30,7 +30,6 @@ const DataSyncer = () => {
 
           const localData = await StorageService.getItem<any>('user_progress', 'user');
 
-          // 2. 🟢 Prepare Payload that matches Zod Schema perfectly
           const payload = {
             displayName: user.displayName,
             // Required fields: Use local data OR default to 0 (Fixes 400 Error)
@@ -107,10 +106,13 @@ function App() {
   return (
     <BrowserRouter>
       <DataSyncer />
-      <div className="min-h-screen bg-slate-50 text-slate-900 font-sans overflow-x-hidden">
-        <Suspense fallback={<PageLoader />}>
-          <AnimatedRoutes />
-        </Suspense>
+      <div className="min-h-screen bg-[#F6F5F5] text-[#222222] font-sans overflow-x-hidden relative">
+        <div className="fixed inset-0 pointer-events-none bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-[#D9E2FF]/40 via-transparent to-transparent opacity-70" />
+        <div className="relative z-10">
+          <Suspense fallback={<PageLoader />}>
+            <AnimatedRoutes />
+          </Suspense>
+        </div>
       </div>
     </BrowserRouter>
   );

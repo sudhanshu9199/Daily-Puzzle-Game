@@ -20,6 +20,8 @@ export default defineConfig({
         background_color: '#f8fafc',
         display: 'standalone',
         orientation: 'portrait',
+        start_url: "/",
+        scope: "/",
         icons: [
           {
             src: "icons/daily_icon-48x48.png",
@@ -75,6 +77,11 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ["**/*.{js,css,html,ico,png,svg}"],
+        cleanupOutdatedCaches: true, // Cleans old cache versions to save space
+        clientsClaim: true, // Takes control of the page immediately
+        skipWaiting: true, // Activates new SW version immediately
+        navigateFallback: "/index.html",
+        
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,

@@ -11,7 +11,7 @@ import {
   HelpCircle,
   Sparkles,
 } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { StreakHeatmap } from "./StreakHeatmap";
 
 export const GameInterface = () => {

@@ -1,4 +1,4 @@
-import type { GeneratorParams, PuzzleGenerator } from "./generator.types";
+import type { PuzzleGenerator } from "./generator.types";
 
 export const generateMathPuzzle: PuzzleGenerator = ({ rng }) => {
   const n1 = Math.floor(rng(1) * 50) + 1;

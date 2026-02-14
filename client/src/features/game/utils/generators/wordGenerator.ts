@@ -1,4 +1,4 @@
-import type { GeneratorParams, PuzzleGenerator } from "./generator.types";
+import type { PuzzleGenerator } from "./generator.types";
 
 // Production Note: In a real app, this list should be much larger or compressed in a separate JSON file.
 const WORD_BANK = ["REACT", "CODE", "NODE", "GAME", "LOGIC", "JAVA", "VITE", "TYPESCRIPT", "PRISMA", "NEXTJS"];
